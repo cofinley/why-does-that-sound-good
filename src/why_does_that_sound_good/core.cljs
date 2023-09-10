@@ -2,7 +2,6 @@
   (:require
    [reagent.dom :as rdom]
    [re-frame.core :as re-frame]
-   ;; [re-pressed.core :as rp]
    [breaking-point.core :as bp]
    [why-does-that-sound-good.events :as events]
    [why-does-that-sound-good.views :as views]
@@ -26,7 +25,6 @@
 
 (defn init []
   (re-frame/dispatch-sync [::events/initialize-db])
-  ;; (re-frame/dispatch-sync [::rp/add-keyboard-event-listener "keydown"])
   (re-frame/dispatch-sync [::bp/set-breakpoints
                            {:breakpoints [:mobile
                                           768

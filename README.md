@@ -65,7 +65,6 @@ Some things I noticed with existing solutions which prompted me to create my own
   [FAQs](https://github.com/day8/re-frame/blob/master/docs/FAQs/README.md)) ->
   [Reagent](https://github.com/reagent-project/reagent) ->
   [React](https://github.com/facebook/react)
-  - Keyboard event handler: [re-pressed](https://github.com/gadfly361/re-pressed)
   - Screen breakpoints tool: [BREAKING-POINT](https://github.com/gadfly361/breaking-point)
 * Build tools
   - CLJS compilation, dependency management, REPL, & hot reload: [`shadow-cljs`](https://github.com/thheller/shadow-cljs)
