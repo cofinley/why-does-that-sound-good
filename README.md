@@ -4,6 +4,16 @@ AKA Happy Accidentals
 
 A front-end-only web app which listens to your MIDI keyboard and helps reverse-engineer/fuzzy-search what you played to help figure out the context (e.g. chord, scale).
 
+## Link
+
+https://cofinley.github.io/why-does-that-sound-good/
+
+## Demo
+
+Click the image below to see the video
+
+[![Demo video](https://img.youtube.com/vi/8pHL7TzVDfk/maxresdefault.jpg)](https://www.youtube.com/watch?v=8pHL7TzVDfk)
+
 ## Features
 
 - Fuzzy chord and scale identification
@@ -13,7 +23,7 @@ A front-end-only web app which listens to your MIDI keyboard and helps reverse-e
 - MIDI in/out and preview
 - Progression building
 - Group chords into sections
-- Private; LocalStorage saving, no back-end servers
+- Private; LocalStorage saving, static site; no back-end servers
 
 ## Rationale
 
