@@ -4,6 +4,12 @@ AKA Happy Accidentals
 
 A front-end-only web app which listens to your MIDI keyboard and helps reverse-engineer/fuzzy-search what you played to help figure out the context (e.g. chord, scale).
 
+## Demo
+
+Click the image below to see the video
+
+[![Demo video](https://img.youtube.com/vi/8pHL7TzVDfk/maxresdefault.jpg)](https://www.youtube.com/watch?v=8pHL7TzVDfk)
+
 ## Features
 
 - Fuzzy chord and scale identification
