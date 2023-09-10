@@ -234,6 +234,15 @@
  (fn [data [_ debounce-ms]]
    (assoc data :live-block-debounce debounce-ms)))
 
+(reg-event-db
+ ::on-settings-reset
+ interceptors
+ (fn [data _]
+   (assoc data
+          :play-chords-broken? false
+          :live-block-debounce db/default-live-block-creation-debounce
+          :max-live-blocks db/default-max-live-blocks)))
+
 ;; Blocks
 
 (reg-event-db

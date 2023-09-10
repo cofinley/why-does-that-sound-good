@@ -87,12 +87,13 @@
         live-section-scales @(re-frame/subscribe [::subs/section-scale-suggestions :live])
         max-live-blocks @(re-frame/subscribe [::subs/max-live-blocks])]
     [:<>
-     [button
-      {:class "flex gap-x-2 items-center self-start"
-       :on-click #(when (js/confirm "Are you sure you want to delete all live blocks?")
-                    (re-frame/dispatch [::events/on-section-clear :live]))}
-      [delete-icon]
-      "Clear Live Blocks"]
+     (when (seq live-section-blocks)
+       [button
+       {:class "flex gap-x-2 items-center self-start"
+        :on-click #(when (js/confirm "Are you sure you want to delete all live blocks?")
+                     (re-frame/dispatch [::events/on-section-clear :live]))}
+       [delete-icon]
+       "Clear Live Blocks"])
      [:div
       {:class (str/join " " [(when (= 1 max-live-blocks) "justify-center") "flex grow gap-x-4 overflow-y-auto"])}
       (when (< 1 max-live-blocks)

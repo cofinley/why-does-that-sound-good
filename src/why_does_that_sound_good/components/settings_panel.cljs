@@ -2,7 +2,8 @@
   (:require
    [re-frame.core :as re-frame]
    [why-does-that-sound-good.events :as events]
-   [why-does-that-sound-good.subs :as subs]))
+   [why-does-that-sound-good.subs :as subs]
+   [why-does-that-sound-good.components.button :refer [button]]))
 
 (defn settings-panel []
   (let [access @(re-frame/subscribe [::subs/midi-access])
@@ -41,4 +42,8 @@
        [:input
         {:class "dark:text-neutral-100 flex p-1.5 rounded dark:bg-neutral-700 border dark:border-neutral-500"
          :type "number" :min 1 :max 1000 :value live-block-debounce :on-change #(re-frame/dispatch [::events/on-live-block-debounce-change (-> % .-target .-value int)])}]
-       [:span "milliseconds"]]]]))
+       [:span "milliseconds"]]]
+     [button
+      {:class "self-start mt-5"
+       :on-click #(re-frame/dispatch [::events/on-settings-reset])}
+      "Reset to Default Settings"]]))

@@ -121,7 +121,7 @@
   (let [combined-variation-combo-notes (apply set/union (map #(or (:chord-notes %) (:notes %)) block-variation-combo))
         combined-variation-combo-pitches (set (map pitch/find-pitch-class-name combined-variation-combo-notes))
         scales (pitches->scales combined-variation-combo-pitches :min-scale-similarity min-scale-similarity :find-closest? find-closest?)
-        lowest-octave (min (pitch/note->octave (min combined-variation-combo-notes)))
+        lowest-octave (min (pitch/note->octave (apply min combined-variation-combo-notes)))
         chord-blocks (filter #(some? (:chord-notes %)) block-variation-combo)]
     (reduce (fn [new-scales scale]
        (let [scale-key (select-keys scale [:root :scale-type])
