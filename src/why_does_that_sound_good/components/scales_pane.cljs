@@ -38,7 +38,9 @@
             {:class "!w-4 !h-4"}]]]
          [:div.flex.flex-col.gap-y-1.items-center
           [:button
-           {:on-click #(swap! index dec)
+           {:on-click #(let [new-index (dec @index)]
+                         (reset! index new-index)
+                         (re-frame/dispatch [::events/on-chord-suggestion-hover (nth pitch-chords new-index)]))
             :class (when (= 0 @index) "invisible")
             :title "Go to previous diatonic chord"}
            [chevron-up-icon]]
@@ -49,7 +51,9 @@
            (when-let [s (:similarity chord)]
              [similarity-badge s])]
           [:button
-           {:on-click #(swap! index inc)
+           {:on-click #(let [new-index (inc @index)]
+                         (reset! index new-index)
+                         (re-frame/dispatch [::events/on-chord-suggestion-hover (nth pitch-chords new-index)]))
             :class (when (= @index (dec (count pitch-chords))) "invisible")
             :title "Go to next diatonic chord"}
            [chevron-down-icon]]]]))))
