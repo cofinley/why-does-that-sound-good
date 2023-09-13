@@ -104,7 +104,7 @@
                  (remove #(= % closest-note-name) original-note-names-remaining)
                  (conj chord-notes chord-note)))))))
 
-(defn chord->readable-intervals [root chord-type]
+(defn chord->readable-intervals [{:keys [root chord-type]}]
   (let [intervals (pitch/CHORD chord-type)]
     (reduce (fn [m interval]
               (let [pitch (pitch/interval->pitch root interval)
@@ -130,7 +130,7 @@
              (map #(assoc %
                           :original-block-id (:id block)
                           :lowest-note-root? (if (= lowest-pitch (:root %)) 1 0)
-                          :chord-pitches->readable-intervals (chord->readable-intervals (:root %) (:chord-type %))
+                          :chord-pitches->readable-intervals (chord->readable-intervals %)
                           :chord-notes (get-relative-chord-notes notes (:chord-pitches %))))
              (sort-by (juxt (comp - :similarity) (comp - :lowest-note-root?))))))))
 

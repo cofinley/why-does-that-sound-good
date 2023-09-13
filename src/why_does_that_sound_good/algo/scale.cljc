@@ -77,7 +77,7 @@
            {:root root-pitch
             :chord-type chord-type
             :chord-intervals chord-intervals
-            :chord-pitches->readable-intervals (chord/chord->readable-intervals root-pitch chord-type)
+            :chord-pitches->readable-intervals (chord/chord->readable-intervals {:root root-pitch :chord-type chord-type})
             :chord-notes (map #(+ root-note %) (sort chord-intervals))})
          diatonic-chord-types)))
 
