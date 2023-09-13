@@ -4,7 +4,7 @@
 
 (deftest find-closest-octave-test
   (is (= 4 (chord/find-closest-octave :C 60)))
-  (is (= 4 (chord/find-closest-octave :B 60))))
+  (is (= 3 (chord/find-closest-octave :B 60))))
 
 (deftest get-relative-chord-notes-test
   (are [expected-notes original-notes chord-pitches] (= expected-notes (chord/get-relative-chord-notes original-notes chord-pitches))
