@@ -54,7 +54,7 @@
                  highlighted? (or (utils/in? live-notes (:midi key)) (utils/in? notes (:midi key)))
                  chord-note? (utils/in? (:chord-notes temp-chord-suggestion) (:midi key))
                  overridden? (and notes-overridden? highlighted?)
-                 interval (if chord-note? (get (:chord-pitches->intervals temp-chord-suggestion) (:pitch key)) nil)
+                 interval (if chord-note? (get (:chord-pitches->readable-intervals temp-chord-suggestion) (:pitch key)) nil)
                  key-color (if white?
                              (cond
                                overridden? white-key-color-overridden

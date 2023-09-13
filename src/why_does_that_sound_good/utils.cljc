@@ -1,7 +1,8 @@
 (ns why-does-that-sound-good.utils
   (:require
-   [why-does-that-sound-good.pitch :as pitch]
-   [clojure.set :as set]))
+   [clojure.set :as set]
+   [clojure.string :as str]
+   [why-does-that-sound-good.pitch :as pitch]))
 
 (defn block->used-notes [block]
   (or (get-in block [:selected-suggestion :chord-notes])
@@ -15,7 +16,7 @@
        set))
 
 (defn in?
-  "true if coll contains element"
+  "true if coll contains element, else nil"
   [coll el]
   (some #(= el %) coll))
 
@@ -28,8 +29,9 @@
   (get-cyclic-distance (pitch/NOTES a) (pitch/NOTES b) (count pitch/REVERSE-NOTES)))
 
 (defn music-structure->str
-  [{:keys [root chord-type scale-type]}]
-  (str (name root) (name (or chord-type scale-type))))
+  [{:keys [root chord-type scale-type]} & {:keys [space?]
+                                           :or {space? false}}]
+  (str/join (if space? " " "") [(name root) (name (or chord-type scale-type))]))
 
 (defn median [coll]
   (if (= (count coll) 1)
@@ -45,14 +47,13 @@
 
 (defn pitch-similarity
   "Get Jaccard Index of input pitches vs. chord/scale pitches (weighted more if root pitch in input)"
-  [input-pitches dest-pitches dest-root]
+  [input-pitches dest-pitches dest-pitches-root]
   (let [jaccard-index (jaccard-index input-pitches dest-pitches)
-        dest-root-in-pitches (contains? input-pitches dest-root)
+        dest-root-in-pitches (contains? input-pitches dest-pitches-root)
         dest-root-in-input-pitches-weight 1
         dest-root-in-input-pitches-coefficient (if dest-root-in-pitches dest-root-in-input-pitches-weight 0)]
     (/ (+ jaccard-index dest-root-in-input-pitches-coefficient)
        (+ 1             dest-root-in-input-pitches-weight))))
-
 
 (defn pitches->example-notes
   "For showing scale pitches on piano preview at middle C
@@ -69,3 +70,8 @@
         (if pitch-match?
           (recur (conj notes note) (range (inc note) 85) (subvec ps 1))
           (recur notes (range (inc note) 85) ps))))))
+
+(defn upsert-in [m ks v]
+  (if (get-in m ks)
+    (update-in m ks conj v)
+    (assoc-in m ks [v])))

@@ -27,9 +27,9 @@
 (def ALL-CHORDS
   (into {} (for [root-pitch (vals pitch/REVERSE-NOTES)
                  [chord-type intervals] pitch/CHORD
-                 :let [combined-key {:root root-pitch :chord-type chord-type}
+                 :let [chord-desc {:root root-pitch :chord-type chord-type}
                        pitches (set (map #(pitch/interval->pitch root-pitch %) intervals))]]
-             [combined-key pitches])))
+             [chord-desc pitches])))
 
 (defn find-closest-note-name-to-pitch [pitch note-names]
   (loop [note-names note-names
@@ -44,23 +44,43 @@
           (recur (rest note-names) distance note-name)
           (recur (rest note-names) closest-distance closest-note-name))))))
 
+(defn find-closest-octave
+  "Find closest octave to note given a pitch (not necessarily same octave as note)"
+  [pitch closest-note]
+  (loop [octaves (map #(+ % (pitch/note->octave closest-note)) (range -1 2))
+         min-distance 100
+         closest-octave nil]
+    (if (empty? octaves)
+      closest-octave
+      (let [octave (first octaves)
+            note (pitch/construct-note pitch octave)
+            distance (abs (- closest-note note))]
+        (if (< distance min-distance)
+          (recur (rest octaves) distance octave)
+          (recur (rest octaves) min-distance closest-octave))))))
+
 (defn match-pitches-to-note-names
   "Try to match chord pitches (e.g. :D) to original note names (e.g. :D4)
    1. Find exact matches between pitches and the pitches of the notes ({:D :D4})
    2. Separate out anything that wasn't matched (i.e. chord pitches which had no note match, and notes which had no chord pitch match)"
-  [pitches notes]
-  (let [note-pitch->note-name (reduce (fn [m note] (assoc m (pitch/find-pitch-class-name note) (pitch/find-note-name note))) {} notes)
-        chord-pitch->note-name (reduce (fn [m chord-pitch] (assoc m chord-pitch (get note-pitch->note-name chord-pitch))) {} pitches)]
-    {:matched-note-names (vals (into {} (filter (fn [[_ note-name]] (some? note-name))
-                                                chord-pitch->note-name)))
-     :unmatched-pitches (keys (into {} (filter (fn [[_ note-name]] (nil? note-name))
-                                               chord-pitch->note-name)))
-     :unmatched-note-names (filter (fn [note-name]
-                                     (not (some #(= % note-name)
-                                                (vals chord-pitch->note-name))))
-                                   (vals note-pitch->note-name))}))
+  [chord-pitches original-notes]
+  (let [note-pitch->note-names (reduce (fn [m note]
+                                         ;; There might be multiple instances of the same pitch played; upsert them
+                                         (utils/upsert-in m [(pitch/find-pitch-class-name note)] (pitch/find-note-name note)))
+                                       {}
+                                       original-notes)
+        chord-pitch->note-names (reduce (fn [m chord-pitch]
+                                          (assoc m chord-pitch (get note-pitch->note-names chord-pitch)))
+                                        {}
+                                        chord-pitches)
+        {matched-chord-pitches true
+         unmatched-chord-pitches false} (group-by #(some? (val %)) chord-pitch->note-names)]
+    {:matched-note-names (flatten (vals matched-chord-pitches))
+     :unmatched-pitches (or (keys unmatched-chord-pitches) (list))
+     :unmatched-note-names (flatten (filter (fn [note-names]
+                                              (not (some #(= % note-names) (vals chord-pitch->note-names))))
+                                            (vals note-pitch->note-names)))}))
 
-;; TODO: keep same-pitch notes in chord, even if user plays same pitch in multiple octaves
 (defn get-relative-chord-notes
   "Voice chord closest to original notes
    AKA match chord pitch to closest original note octaves
@@ -72,13 +92,13 @@
            original-note-names-remaining (:unmatched-note-names matches)
            chord-notes []]
       (if (empty? chord-pitches-remaining)
-        (concat (map pitch/note (:matched-note-names matches)) chord-notes)
+        (sort (concat (map pitch/note (:matched-note-names matches)) chord-notes))
         (let [chord-pitch (first chord-pitches-remaining)
               closest-note-name (when-not (empty? original-note-names-remaining)
                                   (find-closest-note-name-to-pitch chord-pitch original-note-names-remaining))
               closest-octave (if (empty? original-note-names-remaining)
                                original-octave-center
-                               (:octave (pitch/note-info closest-note-name)))
+                               (find-closest-octave chord-pitch (pitch/note closest-note-name)))
               chord-note (pitch/construct-note chord-pitch closest-octave)]
           (recur (rest chord-pitches-remaining)
                  (remove #(= % closest-note-name) original-note-names-remaining)
@@ -97,10 +117,10 @@
     (when (> (count notes) 1)
       (let [block-pitches (set (map pitch/find-pitch-class-name notes))
             lowest-pitch (pitch/find-pitch-class-name (first (sort notes)))
-            chords (map (fn [[chord-key chord-pitches]]
-                          (assoc chord-key
+            chords (map (fn [[chord-desc chord-pitches]]
+                          (assoc chord-desc
                                  :chord-pitches chord-pitches
-                                 :similarity (utils/pitch-similarity block-pitches chord-pitches (:root chord-key))))
+                                 :similarity (utils/pitch-similarity block-pitches chord-pitches (:root chord-desc))))
                         ALL-CHORDS)
             max-similarity-found (:similarity (apply max-key :similarity chords))]
         (->> chords
@@ -110,7 +130,7 @@
              (map #(assoc %
                           :original-block-id (:id block)
                           :lowest-note-root? (if (= lowest-pitch (:root %)) 1 0)
-                          :chord-pitches->intervals (chord->readable-intervals (:root %) (:chord-type %))
+                          :chord-pitches->readable-intervals (chord->readable-intervals (:root %) (:chord-type %))
                           :chord-notes (get-relative-chord-notes notes (:chord-pitches %))))
              (sort-by (juxt (comp - :similarity) (comp - :lowest-note-root?))))))))
 
