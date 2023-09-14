@@ -45,4 +45,7 @@
   :karma-test
   {:target    :karma
    :ns-regexp "-test$"
-   :output-to "target/karma-test.js"}}}
+   :output-to "target/karma-test.js"}
+  :node-test
+  {:target :node-test
+   :output-to "target/node-test.js"}}}
