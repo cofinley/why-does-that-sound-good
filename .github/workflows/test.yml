@@ -12,6 +12,8 @@ jobs:
       - uses: actions/checkout@v2
       - name: npm install
         run: 'npm install'
+      - name: prebuild
+        run: 'npm run build'
       - name: run tests
         run: |
           nohup npm run watch &
