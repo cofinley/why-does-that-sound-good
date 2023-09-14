@@ -13,7 +13,7 @@ jobs:
       - name: npm install
         run: 'npm install'
       - name: setup dirs
-        run 'mkdir -p resources/public/js/compiled'
+        run: 'mkdir -p resources/public/js/compiled'
       - name: run tests
         run: |
           nohup npm run watch &
