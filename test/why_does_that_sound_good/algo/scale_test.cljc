@@ -1,22 +1,21 @@
 (ns why-does-that-sound-good.algo.scale-test
-  (:require [clojure.test :refer [deftest testing is are]]
-            [why-does-that-sound-good.algo.scale :as scale]
-            [why-does-that-sound-good.pitch :as pitch]
-            [why-does-that-sound-good.algo.chord :as chord]))
+  (:require
+   [clojure.test :refer [deftest testing is are]]
+   [why-does-that-sound-good.algo.scale :as scale]))
 
 (deftest steps->intervals-test
-  (are [expected-intervals input-steps] (= expected-intervals (scale/steps->intervals input-steps))
-    '(0) ()
-    '(0 1 3 6) '(1 2 3)
-    '(0 2 4 5 7 9 11 12) '(2 2 1 2 2 2 1)))
+  (are [input-steps expected-intervals] (= expected-intervals (scale/steps->intervals input-steps))
+    () '(0)
+    '(1 2 3) '(0 1 3 6)
+    '(2 2 1 2 2 2 1) '(0 2 4 5 7 9 11 12)))
 
 (deftest scale->pitches-test
-  (are [expected-pitches root-pitch scale-type] (= expected-pitches (scale/scale->pitches root-pitch scale-type))
-    '(:C :D :E :F :G :A :B)      :C  :major
-    '(:C :D :Eb :F :G :Ab :Bb)   :C  :minor
-    '(:C# :Eb :F :F# :Ab :Bb :C) :C# :major
+  (are [root-pitch scale-type expected-pitches] (= expected-pitches (scale/scale->pitches root-pitch scale-type))
+    :C  :major '(:C :D :E :F :G :A :B)
+    :C  :minor '(:C :D :Eb :F :G :Ab :Bb)
+    :C# :major '(:C# :Eb :F :F# :Ab :Bb :C)
     ;; TODO: convert accidentals accordingly
-    '(:C# :Eb :F :F# :Ab :Bb :C) :Db :major))
+    :Db :major '(:C# :Eb :F :F# :Ab :Bb :C)))
 
 (deftest scale-pitches->intervals-test
   ;; Intervals all the way to up a 13th
@@ -96,19 +95,3 @@
             :chord-notes (60 65 67)})
          (scale/scale-pitch->diatonic-chords (get scale/ALL-SCALES {:root :C :scale-type :major})
                                              :C))))
-
-(defn chord->example-notes [root chord-type]
-  (->> {:root root :chord-type chord-type}
-       chord/ALL-CHORDS
-       (map #(pitch/construct-note % 4))))
-
-(def c-major-blocks
-  (map-indexed (fn [i [root chord-type]]
-                 {:id i :notes (chord->example-notes root chord-type)})
-               [[:C :maj]
-                [:D :min]
-                [:E :min]
-                [:F :maj]
-                [:G :maj]
-                [:A :min]
-                [:B :dim]]))
