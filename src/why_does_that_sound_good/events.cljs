@@ -105,7 +105,7 @@
                          (assoc :min-chord-similarity (:min-chord-similarity block))
                          (cond->
                              ;; Select chord suggestion if saving from live block's suggestions
-                          (not (nil? chord)) (assoc :selected-suggestion chord)))
+                          (some? chord) (assoc :selected-suggestion chord)))
            chord-suggestions (get-in db [:chord-suggestions (:id block)])]
        (-> db
            (assoc-in [:data :blocks next-block-id] new-block)
@@ -409,10 +409,11 @@
                           :or {min-similarity nil}}]]
    (let [section-block-ids (get-in db [:data :sections section-id :block-ids])
          blocks (vals (select-keys (get-in db [:data :blocks]) section-block-ids))
+         pregenerated-block-chord-suggestions (select-keys (:chord-suggestions db) section-block-ids)
          scales (when (<= 2 (count blocks))
                   (if (nil? min-similarity)
-                    (scale/mem-blocks->scales blocks :find-closest? true)
-                    (scale/mem-blocks->scales blocks :min-scale-similarity min-similarity)))]
+                    (scale/mem-blocks->scales blocks :pregenerated-block-chord-suggestions pregenerated-block-chord-suggestions :find-closest? true)
+                    (scale/mem-blocks->scales blocks :pregenerated-block-chord-suggestions pregenerated-block-chord-suggestions :min-scale-similarity min-similarity)))]
      (-> db
          (assoc-in [:scale-suggestions section-id] scales)
          (cond->
@@ -424,9 +425,10 @@
    (assoc db :scale-suggestions
           (reduce (fn [m [section-id section]]
                     (let [section-block-ids (:block-ids section)
-                          blocks (vals (select-keys (get-in db [:data :blocks]) section-block-ids))]
+                          blocks (vals (select-keys (get-in db [:data :blocks]) section-block-ids))
+                          pregenerated-block-chord-suggestions (select-keys (:chord-suggestions db) section-block-ids)]
                       (when (<= 2 (count blocks))
-                        (assoc m section-id (scale/mem-blocks->scales blocks :find-closest? true)))))
+                        (assoc m section-id (scale/mem-blocks->scales blocks :pregenerated-block-chord-suggestions pregenerated-block-chord-suggestions :find-closest? true)))))
                   {}
                   (get-in db [:data :sections])))))
 
@@ -440,6 +442,7 @@
 ;; TODO dispatch scale generation and/or merge this into a bigger 'add block to section' event handler
 (reg-event-db
  ::on-scale-chord-save
+ db->local-store
  (fn [db [_ chord]]
    (let [next-block-id (get-in db [:data :next-block-id])
          new-block (-> (db/create-block next-block-id)

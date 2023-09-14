@@ -1,6 +1,8 @@
 (ns why-does-that-sound-good.components.icons
   (:require [clojure.string :as str]))
 
+;; These exist as svg tags instead of img tags so that I can style them (e.g. fill)
+
 (def icon-classes "h-5 w-5 dark:fill-neutral-100 group-hover:dark:fill-neutral-900")
 
 (defn icon [{:keys [class view-box]} & children]

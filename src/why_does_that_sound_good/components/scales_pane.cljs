@@ -82,12 +82,12 @@
           :max 100
           :on-change #(re-frame/dispatch [::events/on-section-min-scale-similarity-change section-id (-> % .-target .-value js/parseInt (/ 100))])}]
         [:div.max-h-full.overflow-y-auto.flex.flex-col.divide-y.dark:divide-neutral-400
-         (for [[scale-key scale-details] suggestions]
-           ^{:key scale-key}
+         (for [[scale-desc scale-details] suggestions]
+           ^{:key (utils/music-structure->str scale-desc)}
            [:div.p-4.pl-0
             [:div.flex.justify-between.items-center
              [:div.flex.flex-col.items-start.gap-y
-              [:h3.text-xl.font-bold (:root scale-key) " " (:scale-type scale-key)]
+              [:h3.text-xl.font-bold (:root scale-desc) " " (:scale-type scale-desc)]
               [similarity-badge (:variation-combo-pitch-similarity scale-details)]]  ;; Should maybe be :original-pitch-similarity, though might close enough
              [scale-piano-preview (:scale-pitches scale-details)]]
             [:div.ml-4
@@ -103,8 +103,8 @@
     (fn []
       (let [suggestions @(re-frame/subscribe [::subs/section-scale-suggestions (:id section)])
             top-suggestion (first suggestions)
-            [scale-key _] (or top-suggestion [])
-            top-name (if scale-key (str/join " " [(name (:root scale-key)) (name (:scale-type scale-key))]) "None")
+            [scale-desc _] (or top-suggestion [])
+            top-name (if scale-desc (utils/music-structure->str scale-desc :space? true) "None")
             display-text "Top scale suggestion: "]
         (if (< 1 (count (:block-ids section)))
           [:<>

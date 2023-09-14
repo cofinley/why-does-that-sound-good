@@ -21,9 +21,7 @@
                            (re-frame/dispatch [::events/on-chord-suggestion-hover s])
                            (reset! hovered? true))
         :on-mouse-leave #(do (re-frame/dispatch [::events/on-chord-suggestion-hover nil])
-                             (reset! hovered? false))
-        :title "Click to play"
-        :on-click #(re-frame/dispatch [::events/on-notes-play (:chord-notes s)])}
+                             (reset! hovered? false))}
        [:div
         {:class (str/join " " [(if @hovered? "visible" "invisible") "relative right-4"])}
         [button
@@ -37,6 +35,8 @@
          (utils/music-structure->str s)]
         [similarity-badge (:similarity s)]]
        [:div
+        {:on-click #(re-frame/dispatch [::events/on-notes-play (:chord-notes s)])
+         :title "Click to play"}
         [piano-preview (:notes block) :chord-notes (:chord-notes s)]]])))
 
 (defn live-block-chord-suggestions [block suggestions & {:keys [current?]
@@ -60,8 +60,6 @@
           :on-mouse-leave #(re-frame/dispatch [::events/on-block-hover-toggle nil])}
          [:div
           {:class " flex items-center justify-between w-full cursor-pointer py-3 px-8 dark:bg-neutral-600 rounded-t-xl"
-           :on-click #(re-frame/dispatch [::events/on-notes-play (:notes block)])
-           :title "Click to play"
            :on-mouse-enter #(reset! hovered? true)
            :on-mouse-leave #(reset! hovered? false)}
           [:div
@@ -79,7 +77,10 @@
           [:span
            {:class "dark:text-neutral-100"}
            "Input"]
-          [piano-preview (:notes block)]]
+          [:div
+           {:on-click #(re-frame/dispatch [::events/on-notes-play (:notes block)])
+            :title "Click to play"}
+           [piano-preview (:notes block)]]]
          [live-block-chord-suggestions block chord-suggestions :current? current?]]))))
 
 (defn live-section-panel []
@@ -89,11 +90,11 @@
     [:<>
      (when (seq live-section-blocks)
        [button
-       {:class "flex gap-x-2 items-center self-start"
-        :on-click #(when (js/confirm "Are you sure you want to delete all live blocks?")
-                     (re-frame/dispatch [::events/on-section-clear :live]))}
-       [delete-icon]
-       "Clear Live Blocks"])
+        {:class "flex gap-x-2 items-center self-start"
+         :on-click #(when (js/confirm "Are you sure you want to delete all live blocks?")
+                      (re-frame/dispatch [::events/on-section-clear :live]))}
+        [delete-icon]
+        "Clear Live Blocks"])
      [:div
       {:class (str/join " " [(when (= 1 max-live-blocks) "justify-center") "flex grow gap-x-4 overflow-y-auto"])}
       (when (< 1 max-live-blocks)

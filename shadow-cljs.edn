@@ -37,12 +37,15 @@
    {:build-options
     {:ns-aliases
      {day8.re-frame.tracing day8.re-frame.tracing-stubs}}}}
-  :browser-test
-  {:target    :browser-test
-   :ns-regexp "-test$"
-   :runner-ns shadow.test.browser
-   :test-dir  "target/browser-test"}
+  ;; :browser-test
+  ;; {:target    :browser-test
+  ;;  :ns-regexp "-test$"
+  ;;  :runner-ns shadow.test.browser
+  ;;  :test-dir  "target/browser-test"}
   :karma-test
   {:target    :karma
    :ns-regexp "-test$"
-   :output-to "target/karma-test.js"}}}
+   :output-to "target/karma-test.js"}
+  :node-test
+  {:target :node-test
+   :output-to "target/node-test.js"}}}
