@@ -3,6 +3,7 @@ module.exports = function (config) {
 
   config.set({
     browsers: ['ChromeHeadless'],
+    flags: ['--no-sandbox'],
     basePath: 'target',
     files: ['karma-test.js'],
     frameworks: ['cljs-test'],
