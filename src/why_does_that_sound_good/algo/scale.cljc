@@ -70,16 +70,17 @@
                                :or {octave 4}}]
   (let [root-note (pitch/note (str (name root-pitch) octave))
         all-scale-intervals (scale-pitches->intervals scale-pitches root-pitch)
-        diatonic-chord-types (filter (fn [[_ chord-intervals]]
-                                       (set/subset? chord-intervals all-scale-intervals))
-                                     pitch/CHORD)]
-    (map (fn [[chord-type chord-intervals]]
-           {:root root-pitch
-            :chord-type chord-type
-            :chord-intervals chord-intervals
-            :chord-pitches->readable-intervals (chord/chord->readable-intervals {:root root-pitch :chord-type chord-type})
-            :chord-notes (map #(+ root-note %) (sort chord-intervals))})
-         diatonic-chord-types)))
+        diatonic-chords (filter (fn [[_ {:keys [intervals]}]]
+                                  (set/subset? intervals all-scale-intervals))
+                                pitch/CHORD)]
+    (->> diatonic-chords
+         (map (fn [[chord-type {:keys [intervals]}]]
+                {:root root-pitch
+                 :chord-type chord-type
+                 :chord-pitches->readable-intervals (chord/chord->readable-intervals {:root root-pitch :chord-type chord-type})
+                 :chord-notes (map #(+ root-note %) (sort intervals))}))
+         ;; Sort by increasing complexity
+         (sort-by #(get pitch/CHORD-ORDER (:chord-type %))))))
 
 (defn scale->diatonic-chords
   "For each pitch in scale, construct their diatonic chords"
@@ -105,7 +106,6 @@
             (let [root-pitch (:root chord)
                   all-chords-for-root (get all-chords root-pitch)]
               (assoc all-chords root-pitch
-                     ;; TODO: after similarity, sort by 'popularity'/complexity
                      (sort-by (comp - #(or (:similarity %) 0))
                               (map (fn [all-chord]
                                      (if (= (:chord-type chord) (:chord-type all-chord))

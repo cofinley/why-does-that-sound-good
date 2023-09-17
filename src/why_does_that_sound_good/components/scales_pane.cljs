@@ -46,7 +46,7 @@
            [chevron-up-icon]]
           [:div.flex.flex-col.items-center.cursor-pointer
            {:on-click #(re-frame/dispatch [::events/on-notes-play (:chord-notes chord)])
-            :title "Click to play"}
+            :title (str/join "\n\n" ["Click to play" (utils/chord-tooltip chord)])}
            [:span.font-semibold chord-str]
            (when-let [s (:similarity chord)]
              [similarity-badge s])]

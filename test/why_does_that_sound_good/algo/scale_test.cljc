@@ -23,75 +23,94 @@
 
 (deftest pitches->scales-test
   (testing "find-closest? true"
-    (is (= '({:root :C,
-              :scale-type :major,
-              :scale-pitches (:C :D :E :F :G :A :B),
+    (is (= '({:root :C
+              :scale-type :major
+              :scale-pitches (:C :D :E :F :G :A :B)
               :similarity 1.0}
-             {:root :A,
-              :scale-type :minor,
-              :scale-pitches (:A :B :C :D :E :F :G),
+             {:root :A
+              :scale-type :minor
+              :scale-pitches (:A :B :C :D :E :F :G)
               :similarity 1.0})
            (scale/pitches->scales #{:C :D :E :F :G :A :B} :find-closest? true))))
   (testing "min-similarity"
-    (is (= '({:root :C,
-              :scale-type :major,
-              :scale-pitches (:C :D :E :F :G :A :B),
+    (is (= '({:root :C
+              :scale-type :major
+              :scale-pitches (:C :D :E :F :G :A :B)
               :similarity 0.9375}
-             {:root :A,
-              :scale-type :melodic-major,
-              :scale-pitches (:A :B :C# :D :E :F :G),
+             {:root :A
+              :scale-type :melodic-major
+              :scale-pitches (:A :B :C# :D :E :F :G)
               :similarity 0.9375}
-             {:root :D,
-              :scale-type :melodic-minor,
-              :scale-pitches (:D :E :F :G :A :B :C#),
+             {:root :D
+              :scale-type :melodic-minor
+              :scale-pitches (:D :E :F :G :A :B :C#)
               :similarity 0.9375}
-             {:root :A,
-              :scale-type :minor,
-              :scale-pitches (:A :B :C :D :E :F :G),
+             {:root :A
+              :scale-type :minor
+              :scale-pitches (:A :B :C :D :E :F :G)
               :similarity 0.9375})
            (scale/pitches->scales #{:C :C# :D :E :F :G :A :B} :min-scale-similarity 0.90)))))
 
 (deftest scale-pitch->diatonic-chords-test
-  (is (= '({:root :C,
-            :chord-type :maj,
-            :chord-intervals #{0 7 4},
-            :chord-pitches->readable-intervals {:C :1, :G :5, :E :M3},
+  (is (= '({:root :C
+            :chord-type "M"
+            :chord-pitches->readable-intervals {:C :1 :E :M3 :G :5}
             :chord-notes (60 64 67)}
-           {:root :C,
-            :chord-type :6*9,
-            :chord-intervals #{0 7 4 9 14},
-            :chord-pitches->readable-intervals {:C :1, :G :5, :E :M3, :A :6, :D :9},
-            :chord-notes (60 64 67 69 74)}
-           {:root :C,
-            :chord-type :maj7,
-            :chord-intervals #{0 7 4 11},
-            :chord-pitches->readable-intervals {:C :1, :G :5, :E :M3, :B :M7},
+           {:root :C
+            :chord-type "maj7"
+            :chord-pitches->readable-intervals {:C :1 :E :M3 :G :5 :B :M7}
             :chord-notes (60 64 67 71)}
-           {:root :C,
-            :chord-type :maj9,
-            :chord-intervals #{0 7 4 11 14},
-            :chord-pitches->readable-intervals {:C :1, :G :5, :E :M3, :B :M7, :D :9},
-            :chord-notes (60 64 67 71 74)}
-           {:root :C,
-            :chord-type :maj11,
-            :chord-intervals #{0 7 4 17 11 14},
+           {:root :C
+            :chord-type "maj9"
             :chord-pitches->readable-intervals
-            {:C :1, :G :5, :E :M3, :F :11, :B :M7, :D :9},
-            :chord-notes (60 64 67 71 74 77)}
-           {:root :C,
-            :chord-type :sus2,
-            :chord-intervals #{0 7 2},
-            :chord-pitches->readable-intervals {:C :1, :G :5, :D :M2},
-            :chord-notes (60 62 67)}
-           {:root :C,
-            :chord-type :6,
-            :chord-intervals #{0 7 4 9},
-            :chord-pitches->readable-intervals {:C :1, :G :5, :E :M3, :A :6},
+            {:C :1 :E :M3 :G :5 :B :M7 :D :M9}
+            :chord-notes (60 64 67 71 74)}
+           {:root :C
+            :chord-type "maj13"
+            :chord-pitches->readable-intervals
+            {:C :1 :E :M3 :G :5 :B :M7 :D :M9 :A :M13}
+            :chord-notes (60 64 67 71 74 81)}
+           {:root :C
+            :chord-type "6"
+            :chord-pitches->readable-intervals {:C :1 :E :M3 :G :5 :A :M6}
             :chord-notes (60 64 67 69)}
-           {:root :C,
-            :chord-type :sus4,
-            :chord-intervals #{0 7 5},
-            :chord-pitches->readable-intervals {:C :1, :G :5, :F :4},
-            :chord-notes (60 65 67)})
-         (scale/scale-pitch->diatonic-chords (get scale/ALL-SCALES {:root :C :scale-type :major})
-                                             :C))))
+           {:root :C
+            :chord-type "6add9"
+            :chord-pitches->readable-intervals
+            {:C :1 :E :M3 :G :5 :A :M6 :D :M9}
+            :chord-notes (60 64 67 69 74)}
+           {:root :C
+            :chord-type "sus4"
+            :chord-pitches->readable-intervals {:C :1 :F :4 :G :5}
+            :chord-notes (60 65 67)}
+           {:root :C
+            :chord-type "sus2"
+            :chord-pitches->readable-intervals {:C :1 :D :M2 :G :5}
+            :chord-notes (60 62 67)}
+           {:root :C
+            :chord-type "5"
+            :chord-pitches->readable-intervals {:C :1 :G :5}
+            :chord-notes (60 67)}
+           {:root :C
+            :chord-type "sus24"
+            :chord-pitches->readable-intervals {:C :1 :D :M2 :F :4 :G :5}
+            :chord-notes (60 62 65 67)}
+           {:root :C
+            :chord-type "M7add13"
+            :chord-pitches->readable-intervals
+            {:C :1 :E :M3 :G :5 :A :M6 :B :M7 :D :M9}
+            :chord-notes (60 64 67 69 71 74)}
+           {:root :C
+            :chord-type "Madd9"
+            :chord-pitches->readable-intervals {:C :1 :E :M3 :G :5 :D :M9}
+            :chord-notes (60 64 67 74)}
+           {:root :C
+            :chord-type "M7sus4"
+            :chord-pitches->readable-intervals {:C :1 :F :4 :G :5 :B :M7}
+            :chord-notes (60 65 67 71)}
+           {:root :C
+            :chord-type "M9sus4"
+            :chord-pitches->readable-intervals
+            {:C :1 :F :4 :G :5 :B :M7 :D :M9}
+            :chord-notes (60 65 67 71 74)})
+         (scale/scale-pitch->diatonic-chords (get scale/ALL-SCALES {:root :C :scale-type :major}) :C))))

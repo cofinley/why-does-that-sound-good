@@ -1,50 +1,160 @@
 (ns why-does-that-sound-good.pitch)
 
+(def interval-name->semitone
+  {:1 0
+   :M2 2
+   :m3 3
+   :M3 4
+   :4 5
+   :d5 6
+   :5 7
+   :A5 8
+   :m6 8
+   :M6 9
+   :d7 9
+   :m7 10
+   :M7 11
+   :m9 13
+   :M9 14
+   :A9 15
+   :m10 15
+   :11 17
+   :A11 18
+   :m13 20
+   :M13 21})
+
+;; From tonal.js
+;; https://github.com/tonaljs/tonal/blob/febd2404924bd8bfe9712aa407ee88943125b9d5/packages/chord-type/data.ts
+
+(def BASE-CHORD
+  (array-map
+   ;; Major
+   "M"           {:interval-names [:1 :M3 :5]                    :aliases ["^","","maj"]                                    :name "major"}
+   "maj7"        {:interval-names [:1 :M3 :5 :M7]                :aliases ["Δ","ma7","M7","Maj7","^7"]                      :name "major seventh"}
+   "maj9"        {:interval-names [:1 :M3 :5 :M7 :M9]            :aliases ["Δ9","^9"]                                       :name "major ninth"}
+   "maj13"       {:interval-names [:1 :M3 :5 :M7 :M9 :M13]       :aliases ["Maj13","^13"]                                   :name "major thirteenth"}
+   "6"           {:interval-names [:1 :M3 :5 :M6]                :aliases ["add6","add13","M6"]                             :name "sixth"}
+   "6add9"       {:interval-names [:1 :M3 :5 :M6 :M9]            :aliases ["6/9","69","M69"]                                :name "sixth added ninth"}
+   "M7b6"        {:interval-names [:1 :M3 :m6 :M7]               :aliases ["^7b6"]                                          :name "major seventh flat sixth"}
+   "maj#4"       {:interval-names [:1 :M3 :5 :M7 :A11]           :aliases ["Δ#4","Δ#11","M7#11","^7#11","maj7#11"]          :name "major seventh sharp eleventh"}
+   ;; Minor
+   ;;; Normal
+   "m"           {:interval-names [:1 :m3 :5]                    :aliases ["min","-"]                                       :name "minor"}
+   "m7"          {:interval-names [:1 :m3 :5 :m7]                :aliases ["min7","mi7","-7"]                               :name "minor seventh"}
+   "m/ma7"       {:interval-names [:1 :m3 :5 :M7]                :aliases ["m/maj7","mM7","mMaj7","m/M7","-Δ7","mΔ","-^7"]  :name "minor/major seventh"}
+   "m6"          {:interval-names [:1 :m3 :5 :M6]                :aliases ["-6"]                                            :name "minor sixth"}
+   "m9"          {:interval-names [:1 :m3 :5 :m7 :M9]            :aliases ["-9"]                                            :name "minor ninth"}
+   "mM9"         {:interval-names [:1 :m3 :5 :M7 :M9]            :aliases ["mMaj9","-^9"]                                   :name "minor/major ninth"}
+   "m11"         {:interval-names [:1 :m3 :5 :m7 :M9 :11]        :aliases ["-11"]                                           :name "minor eleventh"}
+   "m13"         {:interval-names [:1 :m3 :5 :m7 :M9 :M13]       :aliases ["-13"]                                           :name "minor thirteenth"}
+   ;;; Diminished
+   "dim"         {:interval-names [:1 :m3 :d5]                   :aliases ["°","o"]                                         :name "diminished"}
+   "dim7"        {:interval-names [:1 :m3 :d5 :d7]               :aliases ["°7","o7"]                                       :name "diminished seventh"}
+   "m7b5"        {:interval-names [:1 :m3 :d5 :m7]               :aliases ["ø","-7b5","h7","h"]                             :name "half-diminished"}
+   ;; Dominant/Seventh
+   ;;; Normal
+   "7"           {:interval-names [:1 :M3 :5 :m7]                :aliases ["dom"]                                           :name "dominant seventh"}
+   "9"           {:interval-names [:1 :M3 :5 :m7 :M9]            :aliases []                                                :name "dominant ninth"}
+   "13"          {:interval-names [:1 :M3 :5 :m7 :M9 :M13]       :aliases []                                                :name "dominant thirteenth"}
+   "7#11"        {:interval-names [:1 :M3 :5 :m7 :A11]           :aliases ["7#4"]                                           :name "lydian dominant seventh"}
+   ;;; Altered
+   "7b9"         {:interval-names [:1 :M3 :5 :m7 :m9]            :aliases []                                                :name "dominant flat ninth"}
+   "7#9"         {:interval-names [:1 :M3 :5 :m7 :A9]            :aliases []                                                :name "dominant sharp ninth"}
+   "alt7"        {:interval-names [:1 :M3 :m7 :m9]               :aliases []                                                :name "altered"}
+   ;;; Suspended
+   "sus4"        {:interval-names [:1 :4 :5]                     :aliases ["sus"]                                           :name "suspended fourth"}
+   "sus2"        {:interval-names [:1 :M2 :5]                    :aliases []                                                :name "suspended second"}
+   "7sus4"       {:interval-names [:1 :4 :5 :m7]                 :aliases ["7sus"]                                          :name "suspended fourth seventh"}
+   "11"          {:interval-names [:1 :5 :m7 :M9 :11]            :aliases []                                                :name "eleventh"}
+   "b9sus"       {:interval-names [:1 :4 :5 :m7 :m9]             :aliases ["phryg","7b9sus","7b9sus4"]                      :name "suspended fourth flat ninth"}
+   ;; Other
+   "5"           {:interval-names [:1 :5]                        :aliases []                                                :name "fifth"}
+   "aug"         {:interval-names [:1 :M3 :A5]                   :aliases ["+","+5","^#5"]                                  :name "augmented"}
+   "m#5"         {:interval-names [:1 :m3 :A5]                   :aliases ["-#5","m+"]                                      :name "minor augmented"}
+   "maj7#5"      {:interval-names [:1 :M3 :A5 :M7]               :aliases ["maj7+5","+maj7","^7#5"]                         :name "augmented seventh"}
+   "maj9#11"     {:interval-names [:1 :M3 :5 :M7 :M9 :A11]       :aliases ["Δ9#11","^9#11"]                                 :name "major sharp eleventh (lydian)"}
+   "sus24"       {:interval-names [:1 :M2 :4 :5]                 :aliases ["sus4add9"]                                      :name ""}
+   "maj9#5"      {:interval-names [:1 :M3 :A5 :M7 :M9]           :aliases ["Maj9#5"]                                        :name ""}
+   "7#5"         {:interval-names [:1 :M3 :A5 :m7]               :aliases ["+7","7+","7aug","aug7"]                         :name ""}
+   "7#5#9"       {:interval-names [:1 :M3 :A5 :m7 :A9]           :aliases ["7#9#5","7alt"]                                  :name ""}
+   "9#5"         {:interval-names [:1 :M3 :A5 :m7 :M9]           :aliases ["9+"]                                            :name ""}
+   "9#5#11"      {:interval-names [:1 :M3 :A5 :m7 :M9 :A11]      :aliases []                                                :name ""}
+   "7#5b9"       {:interval-names [:1 :M3 :A5 :m7 :m9]           :aliases ["7b9#5"]                                         :name ""}
+   "7#5b9#11"    {:interval-names [:1 :M3 :A5 :m7 :m9 :A11]      :aliases []                                                :name ""}
+   "+add#9"      {:interval-names [:1 :M3 :A5 :A9]               :aliases []                                                :name ""}
+   "M#5add9"     {:interval-names [:1 :M3 :A5 :M9]               :aliases ["+add9"]                                         :name ""}
+   "M6#11"       {:interval-names [:1 :M3 :5 :M6 :A11]           :aliases ["M6b5","6#11","6b5"]                             :name ""}
+   "M7add13"     {:interval-names [:1 :M3 :5 :M6 :M7 :M9]        :aliases []                                                :name ""}
+   "69#11"       {:interval-names [:1 :M3 :5 :M6 :M9 :A11]       :aliases []                                                :name ""}
+   "m69"         {:interval-names [:1 :m3 :5 :M6 :M9]            :aliases ["-69"]                                           :name ""}
+   "7b6"         {:interval-names [:1 :M3 :5 :m6 :m7]            :aliases []                                                :name ""}
+   "maj7#9#11"   {:interval-names [:1 :M3 :5 :M7 :A9 :A11]       :aliases []                                                :name ""}
+   "M13#11"      {:interval-names [:1 :M3 :5 :M7 :M9 :A11 :M13]  :aliases ["maj13#11","M13+4","M13#4"]                      :name ""}
+   "M7b9"        {:interval-names [:1 :M3 :5 :M7 :m9]            :aliases []                                                :name ""}
+   "7#11b13"     {:interval-names [:1 :M3 :5 :m7 :A11 :m13]      :aliases ["7b5b13"]                                        :name ""}
+   "7add6"       {:interval-names [:1 :M3 :5 :m7 :M13]           :aliases ["67","7add13"]                                   :name ""}
+   "7#9#11"      {:interval-names [:1 :M3 :5 :m7 :A9 :A11]       :aliases ["7b5#9","7#9b5"]                                 :name ""}
+   "13#9#11"     {:interval-names [:1 :M3 :5 :m7 :A9 :A11 :M13]  :aliases []                                                :name ""}
+   "7#9#11b13"   {:interval-names [:1 :M3 :5 :m7 :A9 :A11 :m13]  :aliases []                                                :name ""}
+   "13#9"        {:interval-names [:1 :M3 :5 :m7 :A9 :M13]       :aliases []                                                :name ""}
+   "7#9b13"      {:interval-names [:1 :M3 :5 :m7 :A9 :m13]       :aliases []                                                :name ""}
+   "9#11"        {:interval-names [:1 :M3 :5 :m7 :M9 :A11]       :aliases ["9+4","9#4"]                                     :name ""}
+   "13#11"       {:interval-names [:1 :M3 :5 :m7 :M9 :A11 :M13]  :aliases ["13+4","13#4"]                                   :name ""}
+   "9#11b13"     {:interval-names [:1 :M3 :5 :m7 :M9 :A11 :m13]  :aliases ["9b5b13"]                                        :name ""}
+   "7b9#11"      {:interval-names [:1 :M3 :5 :m7 :m9 :A11]       :aliases ["7b5b9","7b9b5"]                                 :name ""}
+   "13b9#11"     {:interval-names [:1 :M3 :5 :m7 :m9 :A11 :M13]  :aliases []                                                :name ""}
+   "7b9b13#11"   {:interval-names [:1 :M3 :5 :m7 :m9 :A11 :m13]  :aliases ["7b9#11b13","7b5b9b13"]                          :name ""}
+   "13b9"        {:interval-names [:1 :M3 :5 :m7 :m9 :M13]       :aliases []                                                :name ""}
+   "7b9b13"      {:interval-names [:1 :M3 :5 :m7 :m9 :m13]       :aliases []                                                :name ""}
+   "7b9#9"       {:interval-names [:1 :M3 :5 :m7 :m9 :A9]        :aliases []                                                :name ""}
+   "Madd9"       {:interval-names [:1 :M3 :5 :M9]                :aliases ["2","add9","add2"]                               :name ""}
+   "Maddb9"      {:interval-names [:1 :M3 :5 :m9]                :aliases []                                                :name ""}
+   "Mb5"         {:interval-names [:1 :M3 :d5]                   :aliases []                                                :name ""}
+   "13b5"        {:interval-names [:1 :M3 :d5 :M6 :m7 :M9]       :aliases []                                                :name ""}
+   "M7b5"        {:interval-names [:1 :M3 :d5 :M7]               :aliases []                                                :name ""}
+   "M9b5"        {:interval-names [:1 :M3 :d5 :M7 :M9]           :aliases []                                                :name ""}
+   "7b5"         {:interval-names [:1 :M3 :d5 :m7]               :aliases []                                                :name ""}
+   "9b5"         {:interval-names [:1 :M3 :d5 :m7 :M9]           :aliases []                                                :name ""}
+   "7no5"        {:interval-names [:1 :M3 :m7]                   :aliases []                                                :name ""}
+   "7b13"        {:interval-names [:1 :M3 :m7 :m13]              :aliases []                                                :name ""}
+   "9no5"        {:interval-names [:1 :M3 :m7 :M9]               :aliases []                                                :name ""}
+   "13no5"       {:interval-names [:1 :M3 :m7 :M9 :M13]          :aliases []                                                :name ""}
+   "9b13"        {:interval-names [:1 :M3 :m7 :M9 :m13]          :aliases []                                                :name ""}
+   "madd4"       {:interval-names [:1 :m3 :4 :5]                 :aliases []                                                :name ""}
+   "mMaj7b6"     {:interval-names [:1 :m3 :5 :m6 :M7]            :aliases []                                                :name ""}
+   "mMaj9b6"     {:interval-names [:1 :m3 :5 :m6 :M7 :M9]        :aliases []                                                :name ""}
+   "m7add11"     {:interval-names [:1 :m3 :5 :m7 :11]            :aliases ["m7add4"]                                        :name ""}
+   "madd9"       {:interval-names [:1 :m3 :5 :M9]                :aliases []                                                :name ""}
+   "dim7M7"      {:interval-names [:1 :m3 :d5 :M6 :M7]           :aliases ["o7M7"]                                          :name ""}
+   "dimM7"       {:interval-names [:1 :m3 :d5 :M7]               :aliases ["oM7"]                                           :name ""}
+   "mb6M7"       {:interval-names [:1 :m3 :m6 :M7]               :aliases []                                                :name ""}
+   "m7#5"        {:interval-names [:1 :m3 :m6 :m7]               :aliases []                                                :name ""}
+   "m9#5"        {:interval-names [:1 :m3 :m6 :m7 :M9]           :aliases []                                                :name ""}
+   "m11A"        {:interval-names [:1 :m3 :A5 :m7 :M9 :11]       :aliases []                                                :name ""}
+   "mb6b9"       {:interval-names [:1 :m3 :m6 :m9]               :aliases []                                                :name ""}
+   "m9b5"        {:interval-names [:1 :M2 :m3 :d5 :m7]           :aliases []                                                :name ""}
+   "M7#5sus4"    {:interval-names [:1 :4 :A5 :M7]                :aliases []                                                :name ""}
+   "M9#5sus4"    {:interval-names [:1 :4 :A5 :M7 :M9]            :aliases []                                                :name ""}
+   "7#5sus4"     {:interval-names [:1 :4 :A5 :m7]                :aliases []                                                :name ""}
+   "M7sus4"      {:interval-names [:1 :4 :5 :M7]                 :aliases []                                                :name ""}
+   "M9sus4"      {:interval-names [:1 :4 :5 :M7 :M9]             :aliases []                                                :name ""}
+   "9sus4"       {:interval-names [:1 :4 :5 :m7 :M9]             :aliases ["9sus"]                                          :name ""}
+   "13sus4"      {:interval-names [:1 :4 :5 :m7 :M9 :M13]        :aliases ["13sus"]                                         :name ""}
+   "7sus4b9b13"  {:interval-names [:1 :4 :5 :m7 :m9 :m13]        :aliases ["7b9b13sus4"]                                    :name ""}
+   "4"           {:interval-names [:1 :4 :m7 :m10]               :aliases ["quartal"]                                       :name ""}
+   "11b9"        {:interval-names [:1 :5 :m7 :m9 :11]            :aliases []                                                :name ""}))
+
+;; Add semitone intervals for fuzzy search/distance
+(def CHORD (reduce (fn [m [chord-type chord-details]]
+                     (assoc-in m [chord-type :intervals] (mapv #(interval-name->semitone %) (:interval-names chord-details))))
+                   BASE-CHORD
+                   BASE-CHORD))
+
+;; Keep chord order above for scale diatonic chords to go from less to more complex
+(def CHORD-ORDER (into {} (map (fn [[i k]] [k i]) (map-indexed vector (keys BASE-CHORD)))))
+
+
 ;; From overtone/music/pitch
-
-(def CHORD
-  {:maj         #{0 4 7}
-   :min         #{0 3 7}
-   :maj7        #{0 4 7 11}
-   :dom7        #{0 4 7 10}
-   :min7        #{0 3 7 10}
-   :aug         #{0 4 8}
-   :dim         #{0 3 6}
-   :dim7        #{0 3 6 9}
-   :+5          #{0 4 8}
-   :m+5         #{0 3 8}
-   :sus2        #{0 2 7}
-   :sus4        #{0 5 7}
-   :6           #{0 4 7 9}
-   :m6          #{0 3 7 9}
-   :7sus2       #{0 2 7 10}
-   :7sus4       #{0 5 7 10}
-   :7-5         #{0 4 6 10}
-   :m7-5        #{0 3 6 10}
-   :7+5         #{0 4 8 10}
-   :m7+5        #{0 3 8 10}
-   :9           #{0 4 7 10 14}
-   :m9          #{0 3 7 10 14}
-   :m7+9        #{0 3 7 10 14}
-   :maj9        #{0 4 7 11 14}
-   :9sus4       #{0 5 7 10 14}
-   :6*9         #{0 4 7 9 14}
-   :m6*9        #{0 3 9 7 14}
-   :7-9         #{0 4 7 10 13}
-   :m7-9        #{0 3 7 10 13}
-   :7-10        #{0 4 7 10 15}
-   :9+5         #{0 10 13}
-   :m9+5        #{0 10 14}
-   :7+5-9       #{0 4 8 10 13}
-   :m7+5-9      #{0 3 8 10 13}
-   :11          #{0 4 7 10 14 17}
-   :m11         #{0 3 7 10 14 17}
-   :maj11       #{0 4 7 11 14 17}
-   :11+         #{0 4 7 10 14 18}
-   :m11+        #{0 3 7 10 14 18}
-   :13          #{0 4 7 10 14 17 21}
-   :m13         #{0 3 7 10 14 17 21}})
-
 (def SCALE
   (let [ionian-sequence     [2 2 1 2 2 2 1]
         hex-sequence        [2 2 1 2 2 3]

@@ -75,3 +75,15 @@
   (if (get-in m ks)
     (update-in m ks conj v)
     (assoc-in m ks [v])))
+
+(defn chord-tooltip
+  "More chord info on hover (long name, aliases)"
+  [chord-desc]
+  (let [chord-details (get pitch/CHORD (:chord-type chord-desc))]
+    (str/join "\n" [(let [chord-name (:name chord-details)]
+                      (str "  Name: " (if (= "" chord-name) "N/A" (str (name (:root chord-desc)) " " chord-name))))
+                    (let [aliases (:aliases chord-details)]
+                      (str "  Aliases:"
+                           (if (seq aliases)
+                             (str "\n    - " (str/join "\n    - " (map #(str (name (:root chord-desc)) %) aliases)))
+                             " N/A")))])))
