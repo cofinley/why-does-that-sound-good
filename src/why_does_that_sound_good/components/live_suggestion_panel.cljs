@@ -31,7 +31,8 @@
        [:div
         {:class "flex flex-col gap-y items-start"}
         [:span
-         {:class "font-semibold text-xl"}
+         {:class "font-semibold text-xl"
+          :title (utils/chord-tooltip s)}
          (utils/music-structure->str s)]
         [similarity-badge (:similarity s)]]
        [:div

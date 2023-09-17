@@ -3,30 +3,9 @@
    [why-does-that-sound-good.pitch :as pitch]
    [why-does-that-sound-good.utils :as utils]))
 
-(def CHORD-INTERVAL-NAMES
-  {0 :1
-   1 :m2
-   2 :M2
-   3 :m3
-   4 :M3
-   5 :4
-   6 :-5
-   7 :5
-   8 :+5
-   9 :6
-   10 :m7
-   11 :M7
-   12 :o
-   13 :-9
-   14 :9
-   15 :-10
-   17 :11
-   18 :+11
-   21 :13})
-
 (def ALL-CHORDS
   (into {} (for [root-pitch (vals pitch/REVERSE-NOTES)
-                 [chord-type intervals] pitch/CHORD
+                 [chord-type {:keys [intervals]}] pitch/CHORD
                  :let [chord-desc {:root root-pitch :chord-type chord-type}
                        pitches (set (map #(pitch/interval->pitch root-pitch %) intervals))]]
              [chord-desc pitches])))
@@ -76,7 +55,7 @@
         {matched-chord-pitches true
          unmatched-chord-pitches false} (group-by #(some? (val %)) chord-pitch->note-names)]
     {:matched-note-names (flatten (vals matched-chord-pitches))
-     :unmatched-pitches (or (keys unmatched-chord-pitches) (list))
+     :unmatched-chord-pitches (or (keys unmatched-chord-pitches) (list))
      :unmatched-note-names (flatten (filter (fn [note-names]
                                               (not (some #(= % note-names) (vals chord-pitch->note-names))))
                                             (vals note-pitch->note-names)))}))
@@ -88,7 +67,7 @@
   [original-notes chord-pitches]
   (let [original-octave-center (utils/median (map pitch/note->octave original-notes))
         matches (match-pitches-to-note-names chord-pitches original-notes)]
-    (loop [chord-pitches-remaining (:unmatched-pitches matches)
+    (loop [chord-pitches-remaining (:unmatched-chord-pitches matches)
            original-note-names-remaining (:unmatched-note-names matches)
            chord-notes []]
       (if (empty? chord-pitches-remaining)
@@ -105,11 +84,14 @@
                  (conj chord-notes chord-note)))))))
 
 (defn chord->readable-intervals [{:keys [root chord-type]}]
-  (let [intervals (pitch/CHORD chord-type)]
-    (reduce (fn [m interval]
+  (let [chord-details (get pitch/CHORD chord-type)
+        intervals (:intervals chord-details)
+        interval-names (:interval-names chord-details)]
+    (reduce (fn [m [i interval]]
               (let [pitch (pitch/interval->pitch root interval)
-                    readable-interval (CHORD-INTERVAL-NAMES interval)]
-                (assoc m pitch readable-interval))) {} intervals)))
+                    readable-interval (nth interval-names i)]
+                (assoc m pitch readable-interval))) {}
+            (map-indexed vector intervals))))
 
 (defn block->chords [block & {:keys [min-chord-similarity find-closest?]
                               :or {min-chord-similarity 0.90 find-closest? false}}]

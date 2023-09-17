@@ -19,20 +19,20 @@
 (deftest block->chords-test
   (are [block expected-chords] (= expected-chords (chord/block->chords block :find-closest? true))
     {:id 1 :notes #{60 64 67}} '({:root :C
-                                  :chord-type :maj
+                                  :chord-type "M"
                                   :chord-pitches #{:C :G :E}
-                                  :similarity 1
+                                  :similarity 1.0
                                   :original-block-id 1
                                   :lowest-note-root? 1
                                   :chord-pitches->readable-intervals {:C :1 :G :5 :E :M3}
                                   :chord-notes (60 64 67)}
                                  {:root :E
-                                  :chord-type :m+5
+                                  :chord-type "m#5"
                                   :chord-pitches #{:E :G :C}
-                                  :similarity 1
+                                  :similarity 1.0
                                   :original-block-id 1
                                   :lowest-note-root? 0
-                                  :chord-pitches->readable-intervals {:E :1 :G :m3 :C :+5}
+                                  :chord-pitches->readable-intervals {:E :1 :G :m3 :C :A5}
                                   :chord-notes (60 64 67)})
 
     {:id 1 :notes #{}} nil))

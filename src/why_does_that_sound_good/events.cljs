@@ -427,8 +427,10 @@
                     (let [section-block-ids (:block-ids section)
                           blocks (vals (select-keys (get-in db [:data :blocks]) section-block-ids))
                           pregenerated-block-chord-suggestions (select-keys (:chord-suggestions db) section-block-ids)]
-                      (when (<= 2 (count blocks))
-                        (assoc m section-id (scale/mem-blocks->scales blocks :pregenerated-block-chord-suggestions pregenerated-block-chord-suggestions :find-closest? true)))))
+                      (if (<= 2 (count blocks))
+                        (let [scales (scale/mem-blocks->scales blocks :pregenerated-block-chord-suggestions pregenerated-block-chord-suggestions :find-closest? true)]
+                          (assoc m section-id scales))
+                        (assoc m section-id {}))))
                   {}
                   (get-in db [:data :sections])))))
 
