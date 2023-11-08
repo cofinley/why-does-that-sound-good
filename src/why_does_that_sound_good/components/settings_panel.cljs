@@ -19,6 +19,7 @@
       [:select.flex.p-2.rounded.dark:bg-neutral-700.dark:text-neutral-100.border.dark:border-neutral-500
        {:on-change #(re-frame/dispatch [::events/on-midi-select-input (-> % .-target .-value)])
         :value (if (nil? current-input) "" current-input)}
+       [:option "Select"]
        (for [input inputs]
          ^{:key (.-id input)}
          [:option (.-name input)])]]
@@ -26,6 +27,7 @@
       [:select.flex.p-2.rounded.dark:bg-neutral-700.dark:text-neutral-100.border.dark:border-neutral-500
        {:on-change #(re-frame/dispatch [::events/on-midi-select-output (-> % .-target .-value)])
         :value (if (nil? current-output) "" current-output)}
+       [:option "Select"]
        (for [output outputs]
          ^{:key (.-id output)}
          [:option (.-name output)])]]
